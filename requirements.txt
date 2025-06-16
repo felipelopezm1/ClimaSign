@@ -1,9 +1,23 @@
+# Core ML and Deep Learning
 torch
 numpy
 scikit-learn
+
+# Gesture Recognition
 mediapipe
 opencv-python
+
+# Image Processing and Generation
 Pillow
+stable_diffusion_pytorch
+
+# API and Location Services
 requests
 geopy
-stable_diffusion_pytorch
+
+# Streamlit Interface
+streamlit
+streamlit-autorefresh
+
+# Utilities
+python-dotenv

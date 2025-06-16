@@ -7,7 +7,7 @@ from streamlit_autorefresh import st_autorefresh
 
 # Paths
 IMAGE_DIR = "generated_images"
-GESTURE_SCRIPT_PATH = "prediction_art_form_v6.py"
+GESTURE_SCRIPT_PATH = "clima_sign_engine.py"
 PROMPT_LOG = os.path.join(IMAGE_DIR, "last_prompt.txt")
 LOG_FILE = "logs/output.txt"
 os.makedirs("logs", exist_ok=True)
@@ -15,7 +15,7 @@ os.makedirs("logs", exist_ok=True)
 st.set_page_config(layout="wide")
 st_autorefresh(interval=5000, key="image_refresh")
 
-st.title("✨ Real-time Gesture-Controlled Weather Art Generator")
+st.title("✨ CimaSign - Real-time Gesture-Controlled Weather Art Generator")
 
 col1, col2 = st.columns([1, 1])
 
