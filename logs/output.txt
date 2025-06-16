@@ -1,0 +1,16 @@
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1750112685.570867   30200 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1750112685.608721   30200 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1750112693.035582   41400 landmark_projection_calculator.cc:186] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+Loading Stable Diffusion models
+Models loaded
+ Real-time Gesture Weather Generator Started. Press 'q' to exit.
+ Detected 'cloudy' gesture - warming up...
+ Gesture 'rainy' confirmed after 12s
+Generating image for gesture 'cloudy' in city 'Exeter'...
+Generating prompt using Ollama... (this may take a few seconds)
+ Running Ollama LLM inference...
+ Prompt generation complete.
+Prompt: The cloudy skies of Exeter! As I gaze upon this gray canvas, I envision a whimsical piece titled "Echoes of Solace." Soft, feathery brushstrokes would capture the misty veil that shrouds the city, as wispy trees and buildings dissolve into the fog-like atmosphere, evoking a sense of serenity and quiet contemplation.
+  0%|          | 0/34 [00:00<?, ?it/s]  3%|▎         | 1/34 [00:06<03:49,  6.94s/it]  6%|▌         | 2/34 [00:14<03:46,  7.08s/it]  9%|▉         | 3/34 [00:21<03:40,  7.13s/it] 12%|█▏        | 4/34 [00:28<03:31,  7.05s/it] 15%|█▍        | 5/34 [00:35<03:22,  6.99s/it] 18%|█▊        | 6/34 [00:41<03:13,  6.92s/it] 21%|██        | 7/34 [00:48<03:07,  6.93s/it] 24%|██▎       | 8/34 [00:55<02:59,  6.92s/it] 26%|██▋       | 9/34 [01:02<02:52,  6.90s/it] 29%|██▉       | 10/34 [01:10<02:50,  7.09s/it] 32%|███▏      | 11/34 [01:17<02:42,  7.07s/it] 35%|███▌      | 12/34 [01:24<02:36,  7.11s/it] 38%|███▊      | 13/34 [01:31<02:29,  7.12s/it] 41%|████      | 14/34 [01:38<02:22,  7.10s/it] 44%|████▍     | 15/34 [01:45<02:16,  7.16s/it] 47%|████▋     | 16/34 [01:52<02:08,  7.14s/it] 50%|█████     | 17/34 [01:59<02:00,  7.11s/it] 53%|█████▎    | 18/34 [02:07<01:53,  7.09s/it] 56%|█████▌    | 19/34 [02:14<01:46,  7.07s/it] 59%|█████▉    | 20/34 [02:21<01:39,  7.07s/it] 62%|██████▏   | 21/34 [02:28<01:32,  7.08s/it] 65%|██████▍   | 22/34 [02:35<01:25,  7.10s/it] 68%|██████▊   | 23/34 [02:42<01:18,  7.15s/it] 71%|███████   | 24/34 [02:49<01:11,  7.11s/it] 74%|███████▎  | 25/34 [02:56<01:04,  7.13s/it] 76%|███████▋  | 26/34 [03:03<00:56,  7.10s/it] 79%|███████▉  | 27/34 [03:11<00:49,  7.12s/it] 82%|████████▏ | 28/34 [03:18<00:42,  7.13s/it] 85%|████████▌ | 29/34 [03:25<00:35,  7.10s/it] 88%|████████▊ | 30/34 [03:32<00:28,  7.11s/it] 91%|█████████ | 31/34 [03:39<00:21,  7.09s/it] 94%|█████████▍| 32/34 [03:46<00:14,  7.11s/it] 97%|█████████▋| 33/34 [03:53<00:07,  7.11s/it]100%|██████████| 34/34 [04:00<00:00,  7.13s/it]100%|██████████| 34/34 [04:00<00:00,  7.08s/it]

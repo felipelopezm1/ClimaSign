@@ -10,12 +10,30 @@ import time
 import os
 from PIL import Image
 from stable_diffusion_pytorch import pipeline, model_loader
+import subprocess
+import json
+import sys
+import io
+
+# Force stdout and stderr to UTF-8 (for writing to logs reliably)
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 #Weather API Key
 API_KEY = "0a90412fb5a549d6b34141436250503"
 
-#UK Cities Batch
 UK_CITIES = [
+    # Expanded UK cities for better weather variety
+    {"name": "Aberdeen", "lat": 57.1497, "lon": -2.0943, "country": "UK"},
+    {"name": "Inverness", "lat": 57.4778, "lon": -4.2247, "country": "UK"},
+    {"name": "Plymouth", "lat": 50.3755, "lon": -4.1427, "country": "UK"},
+    {"name": "Exeter", "lat": 50.7184, "lon": -3.5339, "country": "UK"},
+    {"name": "Norwich", "lat": 52.6309, "lon": 1.2974, "country": "UK"},
+    {"name": "Hull", "lat": 53.7676, "lon": -0.3274, "country": "UK"},
+    {"name": "Dundee", "lat": 56.4620, "lon": -2.9707, "country": "UK"},
+    {"name": "Luton", "lat": 51.8787, "lon": -0.4200, "country": "UK"},
+    {"name": "Stoke-on-Trent", "lat": 53.0027, "lon": -2.1794, "country": "UK"},
+    {"name": "Swansea", "lat": 51.6214, "lon": -3.9436, "country": "UK"},
     {"name": "London", "lat": 51.5074, "lon": -0.1276, "country": "UK"},
     {"name": "Manchester", "lat": 53.4808, "lon": -2.2426, "country": "UK"},
     {"name": "Birmingham", "lat": 52.4862, "lon": -1.8904, "country": "UK"},
@@ -43,58 +61,97 @@ def get_weather_condition(city_name):
         response.raise_for_status()
         return response.json()['current']['condition']['text'].lower()
     except Exception as e:
-        print(f"⚠️ Weather fetch failed for {city_name}: {e}")
+        print(f" ! Weather fetch failed for {city_name}: {e}")
         return "unknown"
+    
+# Use Ollama to generate an emotional prompt based on weather
+# Use Ollama to generate an emotional prompt based on weather
+def get_emotional_prompt(city, weather_type):
+    print("Generating prompt using Ollama... (this may take a few seconds)")
+    try:
+        emotional_contexts = {
+            "rainy": "sad, blue, melancholic",
+            "cloudy": "cold, thoughtful, introspective",
+            "sunny": "happy, warm, joyful",
+            "hail": "strange, chaotic, psychedelic",
+            "snowy": "magical, peaceful, wonderful"
+        }
 
+        mood = emotional_contexts.get(weather_type.lower(), "neutral, abstract")
+
+        prompt = (
+            f"You are an emotional AI art critic. Based on the weather type '{weather_type}' in {city['name']}, "
+            f"which feels {mood}, describe a painting prompt in the impressionist style that captures this emotion. "
+            "Limit your response to under 3 sentences."
+        )
+        prompt = (
+            f"You are an emotional AI art critic. Given the current weather condition '{weather_type}' in {city['name']}, "
+            "describe a painting prompt in the impressionist style that conveys the emotional essence of this scene. "
+            "Keep it under 3 sentences."
+        )
+        print(" Running Ollama LLM inference...")
+        result = subprocess.run(
+            ["ollama", "run", "llama3", prompt],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        print(" Prompt generation complete.")
+        return result.stdout.strip()
+    except Exception as e:
+        print(f"WARNING: Ollama prompt generation failed: {e}")
+        return (
+            f"A {weather_type} day in {city['name']} painted in the impressionist style of Claude Monet. "
+            "Soft brushstrokes, misty tones, atmospheric feeling."
+        )
+
+
+# Image generation for gesture
 def generate_image_for_gesture(gesture_label, city):
-    print(f"🎨 Generating image for {gesture_label} in {city['name']}...")
-    global generation_start_time, tracking_enabled, current_city, current_condition
+    try:
+        print("Generating image for gesture '%s' in city '%s'..." % (gesture_label, city['name']))
+        global generation_start_time, tracking_enabled, current_city, current_condition
 
-    # Claude Monet style prompt
-    prompt = (
-        f"A {gesture_label} day in {city['name']} painted in the impressionist style of Claude Monet. "
-        "The scene is rendered with soft, harmonious colors and expressive, textured brushstrokes. "
-        "Light and shadow blend seamlessly, creating a dreamy, atmospheric quality. Buildings, rivers, "
-        "streets, and landscapes appear as blurred, delicate forms immersed in layers of misty tones. "
-        "The overall composition feels serene, fluid, and painterly, evoking the timeless beauty of Monet’s masterpieces."
-    )
+        prompt = get_emotional_prompt(city, gesture_label)
+        prompts = [prompt]
+        print("Prompt: %s" % prompt)
 
-    print(f"🧠 Prompt: {prompt}")
-    prompts = [prompt]
+        # Save the prompt so Streamlit can display it
+        with open("generated_images/last_prompt.txt", "w", encoding="utf-8", errors="replace") as f: f.write(prompt)
 
-    # Generate image using the actual pipeline syntax
-    image = pipeline.generate(
-        prompts=prompts,
-        uncond_prompts=None,
-        input_images=[],
-        strength=0.8,
-        do_cfg=True,
-        cfg_scale=7.5,
-        height=512,
-        width=512,
-        sampler="k_lms",
-        n_inference_steps=20,
-        seed=None,
-        models=models,
-        device='cpu',
-        idle_device='cpu'
-    )[0]
 
-    image_pil = Image.fromarray(np.asarray(image))
+        image = pipeline.generate(
+            prompts=prompts,
+            uncond_prompts=None,
+            input_images=[],
+            strength=0.9,
+            do_cfg=True,
+            cfg_scale=7.5,
+            height=512,
+            width=512,
+            sampler="k_lms",
+            n_inference_steps=34,
+            seed=None,
+            models=models,
+            device='cpu',
+            idle_device='cpu'
+        )[0]
 
-    output_folder = "generated_images"
-    os.makedirs(output_folder, exist_ok=True)
+        image_pil = Image.fromarray(np.asarray(image))
+        output_folder = "generated_images"
+        os.makedirs(output_folder, exist_ok=True)
+        filename = os.path.join(output_folder, f"{gesture_label}_{city['name']}.png")
+        image_pil.save(filename)
+        print(f"Generated image saved at: {filename}")
 
-    filename = os.path.join(output_folder, f"{gesture_label}_{city['name']}.png")
-    image_pil.save(filename)
+        generation_start_time = time.time()
+        tracking_enabled = False
+        current_city = city
+        current_condition = weather_cache.get(city['name'], "unknown")
 
-    print(f"✅ Generated image saved at: {filename}")
-
-    # Update state
-    generation_start_time = time.time()
-    tracking_enabled = False
-    current_city = city
-    current_condition = weather_cache.get(city['name'], "unknown")
+    except Exception as e:
+        print(f"ERROR: Failed to generate image for {gesture_label} in {city['name']}: {e}")
+        sys.exit(1)
 
 
 def find_closest_matching_city(condition):
@@ -139,7 +196,7 @@ class GestureLSTM(torch.nn.Module):
         return out
 
 #Model loading 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #for when I had to work on it onmy nvidia pc
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #for when I had to work on it on my nvidia pc
 model = GestureLSTM(input_size=30, hidden_size=256, num_classes=5).to(device)
 model.load_state_dict(torch.load('Gesture/gesture_lstm_model.pth', map_location=device))
 model.eval()
@@ -186,7 +243,6 @@ while cap.isOpened():
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     # ✅ STEP 2: Show overlay while generating, disable hand tracking
-        # ✅ Optional: Show gesture info if tracking is disabled
     if not tracking_enabled and current_city:
         try:
             cv2.putText(frame, f"Gesture: {gesture_label}", (10, 100),
@@ -203,7 +259,7 @@ while cap.isOpened():
         alpha = 0.5
         cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
 
-        cv2.putText(frame, f"🖼 Generating image... ({remaining}s)", (10, 50),
+        cv2.putText(frame, f" Generating image... ({remaining}s)", (10, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 255), 2)
 
         if current_city:
@@ -218,7 +274,7 @@ while cap.isOpened():
             sequence_buffer.clear()
             gesture_start_time = None
             gesture_ready = False
-            print("✅ Generation complete. Ready for new gesture.")
+            print("Check Generation complete. Ready for new gesture.")
 
     results = hands.process(frame_rgb)
 
@@ -252,7 +308,7 @@ while cap.isOpened():
             if gesture_label in ["rainy", "sunny", "hail", "cloudy", "snowy"]:
                 if gesture_start_time is None:
                     gesture_start_time = time.time()
-                    print(f"🕒 Detected '{gesture_label}' gesture — warming up...")
+                    print(f" Detected '{gesture_label}' gesture - warming up...")
 
                 elapsed = time.time() - gesture_start_time
 
@@ -262,7 +318,7 @@ while cap.isOpened():
                         cv2.putText(frame, f"Starting in {remaining}s...",
                                     (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
                     else:
-                        print(f"✅ Gesture '{gesture_label}' confirmed after {GESTURE_DELAY}s")
+                        print(f" Gesture '{gesture_label}' confirmed after {GESTURE_DELAY}s")
                         gesture_ready = True
 
                 # Now allow generation ONLY after delay
@@ -276,7 +332,7 @@ while cap.isOpened():
                             sequence_buffer.clear()
                             gesture_start_time = None
                             gesture_ready = False
-                            print("🔄 Ready for next gesture...")
+                            print(" Ready for next gesture...")
             else:
                 # Reset if gesture is not one of the targets
                 gesture_start_time = None
@@ -307,3 +363,10 @@ while cap.isOpened():
 #  Clean up
 cap.release()
 cv2.destroyAllWindows()
+
+# Keep OpenCV window open until user presses 'q' or closes it manually
+while True:
+    if cv2.getWindowProperty("Gesture Controlled Weather Generator", cv2.WND_PROP_VISIBLE) < 1:
+        break
+    if cv2.waitKey(100) & 0xFF == ord('q'):
+        break
