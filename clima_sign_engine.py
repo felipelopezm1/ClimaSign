@@ -14,13 +14,18 @@ import subprocess
 import json
 import sys
 import io
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
+
+API_KEY = os.getenv("WEATHER_API_KEY")
+
+if not API_KEY:
+    raise ValueError("Missing WEATHER_API_KEY. Make sure it's set in the .env file.") #helper if not detected
+
 
 # Force stdout and stderr to UTF-8 (for writing to logs reliably)
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-
-#Weather API Key
-API_KEY = "0a90412fb5a549d6b34141436250503"
 
 UK_CITIES = [
     # Expanded UK cities for better weather variety

@@ -1,2 +1,4 @@
 # Ignore model checkpoints and data
 data/
+
+.env
