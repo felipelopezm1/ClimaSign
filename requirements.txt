@@ -1,0 +1,9 @@
+torch
+numpy
+scikit-learn
+mediapipe
+opencv-python
+Pillow
+requests
+geopy
+stable_diffusion_pytorch
