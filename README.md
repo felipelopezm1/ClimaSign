@@ -66,7 +66,7 @@ generated_images/
 ### 🖼 4. Running with Streamlit UI
 
 ```bash
-streamlit run streamlit_gesture_ui.py
+streamlit run prediction_art_form_v2
 ```
 
 This opens the interface in your browser. You can run the detection script and view live logs + latest generated artwork.
@@ -74,7 +74,7 @@ This opens the interface in your browser. You can run the detection script and v
 ### 🧠 5. Running directly (OpenCV Only)
 
 ```bash
-python prediction_art_form_v6.py
+python prediction_art_form_v2
 ```
 
 This launches the gesture detection and generation system directly in your OpenCV webcam window.
